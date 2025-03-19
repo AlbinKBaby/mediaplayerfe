@@ -41,11 +41,16 @@ function Videocard({displayVideo,setdeleteVideoStatus}) {
         setdeleteVideoStatus(response)
         toast.success(`${displayVideo.caption} successfully deleted`)
       }
+    }
+      const dragStarted = (e,id) =>{
+        console.log(`video with ${id} started dragging`);
+        e.dataTransfer.setData("videoID",id)
+      }
       
-  }
+  
   return (
     <>
-     <Card  style={{ width: '16rem',height:'300px',padding:'5px' }}>
+     <Card  style={{ width: '16rem',height:'300px',padding:'5px' }} draggable onDragStart={(e)=> dragStarted(e,displayVideo.id)}>
       <Card.Img variant="top" src={displayVideo.thumbnailUrl} height={'200px'}
       onClick={handleShow} />
       <Card.Body>

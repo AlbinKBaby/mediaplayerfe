@@ -4,7 +4,7 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import { ToastContainer, toast } from 'react-toastify';
-import { addcategory, deleteCateory, getAllCategories } from '../services/allApi';
+import { addcategory, deleteCateory, getAllCategories, getVideoDetailById, updateCategory } from '../services/allApi';
 
 
 function Category() {
@@ -36,7 +36,7 @@ function Category() {
         getCategories()
       }
 
-getCategories()
+      getCategories()
       handleClose()
     }
 
@@ -56,12 +56,35 @@ getCategories()
   const removeCategory = async (id) => {
     // alert(id) 
     const resp = await deleteCateory(id);
-    if(resp.status === 200){
+    if (resp.status === 200) {
       toast.success(`${CategoryName} Successfully deleted}`)
       getCategories()
     }
-    
   }
+
+  const dragOver = (e) => {
+    e.preventDefault();
+    console.log("inside dragOver");
+
+  }
+  const videoDropped = async(e, id) => {
+    console.log(`Dropped on id ${id}`);
+    const vId = e.dataTransfer.getData('videoID');
+    console.log(`Videos with id ${vId} droppped in category woth id ${id}`);
+    const result = await getVideoDetailById(vId)
+    console.log(result);
+    const {data} = result;
+    let selectCategory = categories?.find((item=>item.id==id));
+    console.log("Selected Category");
+    console.log(selectCategory);
+    selectCategory.allVideos.push(data)
+    console.log("final Category");
+    console.log(selectCategory);
+    const resultNew = await updateCategory(id,selectCategory)
+    getCategories();
+  
+  }
+
 
   return (
     <>
@@ -96,10 +119,27 @@ getCategories()
       </Modal>
       {
         categories?.map((item) => (
-          <div className='border border-secondary rounded p-3 m-3'>
+          <div className='border border-secondary rounded p-3 m-3' droppable
+            onDragOver={(e) => dragOver(e)}
+            onDrop={(e) => videoDropped(e, item.id)}
+          >
             <div className='d-flex justify-content-between align-items-center'>
               <h6>{item.categoryName}</h6>
               <button className='btn btn-danger ' onClick={() => removeCategory(item.id)}><i class="fa-solid fa-trash"></i></button>
+            {
+              item.allVideos?.length>0?
+              item.allVideos.map((video) =>(
+                <div>
+                    {/* <h3>{video.caption}</h3> */}
+                      <img src={video.thumbnailUrl} height={'100px'} width={'100%'} className='mt-2'/>
+
+
+
+                      
+                  </div>
+              )):
+              <p>No item found</p>
+            }            
             </div>
           </div>
 
